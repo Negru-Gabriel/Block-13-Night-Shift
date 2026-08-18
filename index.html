@@ -1,0 +1,392 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Block 13: Night Shift — Guard Game</title>
+    <script type="module" crossorigin src="/assets/index-CfO_atK_.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-BL0uYej-.css">
+  </head>
+  <body>
+    <div id="app"></div>
+
+    <div class="corner tl">BLOCK 13: NIGHT SHIFT</div>
+    <div class="corner br">7 NIGHTS — GUARD DUTY</div>
+    <!-- FPS counter — shown when the SHOW FPS setting is on -->
+    <div id="fps-counter" class="hidden">FPS 60</div>
+
+    <div id="vignette"></div>
+    <!-- Cold-open fade: black, reveals the guard room when a run starts -->
+    <div id="fade" class="hidden"></div>
+    <!-- Cold-open clock: ticks from 23:58 to 00:00 while the room fades in -->
+    <div id="intro-clock" class="hidden">23:58</div>
+    <div id="crosshair" class="hidden"></div>
+    <div id="interact-hint" class="hidden"></div>
+    <div id="result-banner"></div>
+
+    <!-- Night HUD -->
+    <div id="hud" class="hidden">
+      <div id="hud-label">NIGHT 1 — VISITOR 1/4</div>
+      <div id="hud-right">
+        <span id="hud-clock">00:00</span>
+        <span id="hud-score">SCORE 0</span>
+      </div>
+    </div>
+    <div id="banner" class="hidden"></div>
+    <!-- Title screen — the start.png poster. The title and illustration are
+         baked into the artwork; the three empty fields on the left are the
+         New Game / Settings / Credits buttons (labels are added on top — the
+         fields are blank in the image). -->
+    <div id="title">
+      <div class="title-poster">
+        <img id="title-bg" src="/assets/start-CUhDzF9V.png" alt="Block 13: Night Shift" />
+        <button id="btn-start" class="title-btn">New Game</button>
+        <button id="btn-settings" class="title-btn">Settings</button>
+        <button id="btn-credits" class="title-btn">Credits</button>
+      </div>
+
+      <!-- Credits -->
+      <div id="credits-screen" class="hidden">
+        <div class="panel title-subpanel">
+          <h2>Credits</h2>
+          <p class="desc">
+            <b>Block 13: Night Shift</b> — created by <b>Negru Gabriel</b>.
+            You are the night guard of a decaying apartment block; every
+            visitor claims to be a resident, and one wrong decision ends the
+            night.
+          </p>
+          <div class="title-actions">
+            <button id="btn-credits-close" class="btn">Close</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Settings — shared by the title screen and the pause menu -->
+    <div id="settings-screen" class="hidden">
+      <div class="panel title-subpanel settings-panel">
+        <h2>Settings</h2>
+
+        <div class="settings-groups">
+          <div class="setting-group">
+            <h3>AUDIO</h3>
+            <div class="setting-row">
+              <span class="setting-label">MASTER</span>
+              <input id="volume-slider" type="range" min="0" max="100" value="85" aria-label="Master volume" />
+              <span class="setting-value" id="volume-value">85</span>
+            </div>
+            <div class="setting-row">
+              <span class="setting-label">AMBIENCE</span>
+              <input id="ambience-slider" type="range" min="0" max="100" value="100" aria-label="Ambience volume" />
+              <span class="setting-value" id="ambience-value">100</span>
+            </div>
+            <div class="setting-row">
+              <span class="setting-label">EFFECTS</span>
+              <input id="sfx-slider" type="range" min="0" max="100" value="100" aria-label="Effects volume" />
+              <span class="setting-value" id="sfx-value">100</span>
+            </div>
+            <div class="setting-row">
+              <span class="setting-label">VOICE</span>
+              <input id="voice-slider" type="range" min="0" max="100" value="100" aria-label="Voice volume" />
+              <span class="setting-value" id="voice-value">100</span>
+            </div>
+            <div class="setting-row">
+              <span class="setting-label">MUTE</span>
+              <label class="switch">
+                <input type="checkbox" id="mute-toggle" aria-label="Mute all sound" />
+                <span class="switch-slider"></span>
+              </label>
+            </div>
+          </div>
+
+          <div class="settings-col">
+            <div class="setting-group">
+              <h3>CONTROLS</h3>
+              <div class="setting-row">
+                <span class="setting-label">MOUSE SENSITIVITY</span>
+                <input id="sens-slider" type="range" min="20" max="200" step="5" value="100" aria-label="Mouse sensitivity" />
+                <span class="setting-value" id="sens-value">100</span>
+              </div>
+              <div class="setting-row">
+                <span class="setting-label">INVERT MOUSE Y</span>
+                <label class="switch">
+                  <input type="checkbox" id="invert-y-toggle" aria-label="Invert mouse Y" />
+                  <span class="switch-slider"></span>
+                </label>
+              </div>
+            </div>
+
+            <div class="setting-group">
+              <h3>DISPLAY</h3>
+              <div class="setting-row">
+                <span class="setting-label">FIELD OF VIEW</span>
+                <input id="fov-slider" type="range" min="60" max="100" value="75" aria-label="Field of view" />
+                <span class="setting-value" id="fov-value">75</span>
+              </div>
+              <div class="setting-row">
+                <span class="setting-label">GRAPHICS</span>
+                <div class="gfx-buttons">
+                  <button id="gfx-low" class="gfx-btn" type="button">Low</button>
+                  <button id="gfx-medium" class="gfx-btn" type="button">Medium</button>
+                  <button id="gfx-high" class="gfx-btn" type="button">High</button>
+                </div>
+              </div>
+            <div class="setting-row">
+              <span class="setting-label">SHOW FPS</span>
+              <label class="switch">
+                <input type="checkbox" id="fps-toggle" aria-label="Show FPS counter" />
+                <span class="switch-slider"></span>
+              </label>
+            </div>
+          </div>
+
+          <div class="setting-group">
+            <h3>GAMEPLAY</h3>
+            <div class="setting-row">
+              <span class="setting-label">GAME HINTS</span>
+              <label class="switch">
+                <input type="checkbox" id="hints-toggle" aria-label="Show game hints" />
+                <span class="switch-slider"></span>
+              </label>
+            </div>
+          </div>
+          </div>
+        </div>
+
+        <div class="title-actions">
+          <button id="btn-howto" class="btn ghost">How to Play</button>
+          <button id="btn-settings-close" class="btn">Close</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- How to play -->
+    <div id="howto" class="hidden">
+      <div class="panel howto-panel">
+        <h2>How to Play</h2>
+        <ol>
+          <li>A visitor appears at the window, claiming to be a resident. Only let them in if they really are.</li>
+          <li><b>Passport</b> (on the tray) — the identity they present. <kbd>E</kbd> to inspect.</li>
+          <li><b>Journal</b> (the notebook on the desk) — the truth about every resident.</li>
+          <li><b>Belongings</b> (on the tray) — a keychain, letter, book or receipt may belong to someone else.</li>
+          <li><b>Phone</b> (the desk phone) — call the number they gave and listen.</li>
+          <li><b>Intercom</b> (on the wall left of the window) — ask them questions and compare answers.</li>
+          <li>Press the <span class="green-text">green</span> button to let them in, the <span class="red-text">red</span> button to deny. Wrong choice = game over.</li>
+          <li>Survive all 7 nights. Each night is harder.</li>
+        </ol>
+        <p class="tip">
+          Shapeshifters forge the passport, so it always "matches". The truth
+          hides in the details — an off-by-one apartment, a stranger's
+          keychain, a story that doesn't line up with the journal.
+        </p>
+        <p class="tip">
+          Don't trust one tool alone: on later nights a shapeshifter can answer
+          every intercom question cleanly while the lie sits in a belonging on
+          the tray or on the phone line. Cross-reference everything.
+        </p>
+        <div class="title-actions">
+          <button id="btn-howto-close" class="btn">Close</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Item interfaces: passport (renders from passport.html) + tray belongings -->
+    <div id="item-screen" class="hidden">
+      <div id="item-stage">
+        <div id="item-passport" class="hidden"></div>
+
+        <!-- Keychain (rendered from keys.glb) -->
+        <div id="item-keys" class="item-ui hidden">
+          <div class="keys-wrap">
+            <div class="keys-3d">
+              <canvas class="keys-img" width="640" height="420"></canvas>
+            </div>
+            <div class="keys-tag">
+              <span class="keys-tag-label">PROPERTY OF</span>
+              <span class="tag-name" data-item="name">IVAN PETROV</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Letter -->
+        <div id="item-letter" class="item-ui hidden">
+          <div class="sheet">
+            <div class="sheet-head">
+              <span>VERIDIA CITY POST</span>
+              <span>OFFICIAL MAIL</span>
+            </div>
+            <div class="sheet-addressee">
+              <span class="sheet-label">TO</span>
+              <span class="sheet-name" data-item="name">IVAN PETROV</span>
+              <span class="sheet-apt" data-item="apartment">APARTMENT 12</span>
+            </div>
+            <p class="sheet-body">
+              Dear comrade,<br />
+              This letter confirms that the flat is registered in your name
+              and the utilities are paid to the end of the quarter.<br />
+              Please present this letter together with your documents at the
+              housing office.
+            </p>
+            <div class="sheet-sign">— The Housing Committee of Block 13</div>
+          </div>
+        </div>
+
+        <!-- Book -->
+        <div id="item-book" class="item-ui hidden">
+          <div class="bookobj">
+            <div class="book-cover">
+              <span class="book-title">A HISTORY<br />OF THE BLOCK</span>
+            </div>
+            <div class="book-inside">
+              <span class="book-inside-label">EX LIBRIS</span>
+              <span class="book-inside-name" data-item="name">IVAN PETROV</span>
+              <span class="book-inside-apt" data-item="apartment">APT. 12</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Crumpled receipt -->
+        <div id="item-paperball" class="item-ui hidden">
+          <div class="receipt">
+            <div class="receipt-head">CITY MARKET № 4<br /><small>RECEIPT / ЧЕК</small></div>
+            <div class="receipt-lines">
+              <div><span>BREAD</span><span>0.40</span></div>
+              <div><span>MILK</span><span>0.65</span></div>
+              <div><span>SOAP</span><span>0.55</span></div>
+              <div><span>MATCHES</span><span>0.05</span></div>
+            </div>
+            <div class="receipt-madeout">
+              <span class="receipt-label">MADE OUT TO</span>
+              <span class="receipt-name" data-item="name">IVAN PETROV</span>
+            </div>
+            <div class="receipt-total">TOTAL <b>1.65</b></div>
+            <div class="receipt-date">12 MAR 1987</div>
+          </div>
+        </div>
+
+        <div id="item-stamp" class="hidden"></div>
+      </div>
+      <div id="item-bar">
+        <span id="item-claimed"></span>
+        <span class="item-close">Press <kbd>E</kbd> or <kbd>Esc</kbd> to close</span>
+      </div>
+    </div>
+
+    <!-- Resident log (the notebook) -->
+    <div id="log-screen" class="hidden">
+      <img id="log-image" alt="Resident log" />
+      <div class="log-close">Press <kbd>E</kbd> or <kbd>Esc</kbd> to close</div>
+    </div>
+
+    <!-- First-run training: the girl's lesson (bottom panel, window stays visible) -->
+    <div id="training-screen" class="hidden">
+      <div class="training-panel">
+        <div class="training-head">
+          <span class="training-name">THE GIRL</span>
+          <span class="training-kicker">SHE KNOWS THE NIGHT</span>
+        </div>
+        <p class="training-line" id="training-line"></p>
+        <div class="training-foot">
+          <button id="training-next" class="btn">Continue</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Intercom / dialogue — overlaid on the game, left spiky panel + subtitles -->
+    <div id="dialogue-screen" class="hidden">
+      <aside class="dialogue-side">
+        <div class="dialogue-head">
+          <span class="dialogue-title">INTERCOM</span>
+          <span class="dialogue-name"></span>
+        </div>
+        <p class="dialogue-greeting"></p>
+        <div class="dialogue-questions"></div>
+        <div class="dialogue-foot">Ask a question — the answer comes through the speaker. Press <kbd>E</kbd> to close</div>
+      </aside>
+      <div class="dialogue-answer hidden"></div>
+    </div>
+
+    <!-- Desk phone panel -->
+    <div id="phone-screen" class="hidden">
+      <div class="panel phone-panel">
+        <div class="phone-head">
+          <span class="phone-title">DESK PHONE</span>
+          <span class="phone-key">[ E ]</span>
+        </div>
+        <p class="phone-num-label">NUMBER ON THE PASSPORT</p>
+        <p class="phone-number"></p>
+        <p class="phone-journal"></p>
+        <button id="phone-call" class="btn">Call</button>
+        <p class="phone-result hidden"></p>
+        <div class="phone-foot">Press <kbd>E</kbd> to close</div>
+      </div>
+    </div>
+
+    <!-- Night complete -->
+    <div id="night-complete" class="hidden">
+      <div class="panel">
+        <h2 id="nc-title">NIGHT 1 COMPLETE</h2>
+        <p class="sub">The block is quiet. For now.</p>
+        <div class="run-stats" id="nc-stats"></div>
+        <button id="nc-continue" class="btn">Start Night 2</button>
+      </div>
+    </div>
+
+    <!-- Victory — the victory.png poster. The title and illustration are
+         baked into the artwork; the big empty field holds the run stats, and
+         the two empty fields below are the Play Again and Main Menu buttons. -->
+    <div id="victory" class="hidden">
+      <div class="vic-poster">
+        <img id="vic-bg" src="/assets/victory-DcUrrhgY.png" alt="Seven Nights" />
+        <div class="vic-stats">
+          <div class="run-stats" id="victory-stats"></div>
+        </div>
+        <div class="vic-buttons">
+          <button id="victory-play-again" class="vic-btn">Play Again</button>
+          <button id="victory-main-menu" class="vic-btn">Main Menu</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Game over -->
+    <!-- The designed gameover.png poster: its big field holds the reason +
+         horror story + missed tells; the two bordered fields below are the
+         Try Again and Save buttons (labels are added on top — the image
+         fields are empty). Score was removed to fit the poster. -->
+    <div id="gameover" class="hidden">
+      <div class="go-poster">
+        <img id="go-bg" src="/assets/gameover-IqQ-iqaT.png" alt="Game over" />
+        <div class="go-story">
+          <p class="go-reason" id="gameover-reason"></p>
+          <div id="gameover-story" class="hidden"></div>
+          <div id="gameover-tells" class="hidden"></div>
+        </div>
+        <div class="go-buttons">
+          <button id="try-again" class="go-btn">Try Again</button>
+          <button id="main-menu" class="go-btn">Main Menu</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Achievement toast -->
+    <div id="toast" class="hidden">
+      <span class="toast-title"></span>
+      <span class="toast-desc"></span>
+    </div>
+
+    <!-- Pause menu (Esc) — the block holds its breath: every sound stops.
+         The buttons sit at the bottom-left of the screen. -->
+    <div id="pause-screen" class="hidden">
+      <div class="pause-menu">
+        <h1>Paused</h1>
+        <p class="sub">THE BLOCK WAITS FOR YOU</p>
+        <div class="pause-buttons">
+          <button id="pause-resume" class="btn">Resume</button>
+          <button id="pause-settings" class="btn ghost">Settings</button>
+          <button id="pause-main-menu" class="btn ghost">Main Menu</button>
+        </div>
+      </div>
+    </div>
+
+  </body>
+</html>
